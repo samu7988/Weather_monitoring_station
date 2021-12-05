@@ -67,3 +67,64 @@ void spi_init()
 	SPI0->BR = (SPI_BR_SPPR(0x00) | SPI_BR_SPR(0x01)); //SPR(0x01)-> Baud rate divisor = 4, SPPR(0x00)->Prescalar divisor is 1
 	SPI0->C1 |= SPI_C1_SPE_MASK; //Enable spi
 }
+
+/*--------------------------------------------------------------------------------------------------------------------------*/
+/*
+  @brief: Reads a single character from SPI0_D register
+ @param: Pointer into which data is read.
+ @return: None
+ */
+/*-----------------------------------------------------------------------------------------------------------------------------*/
+
+void SPI_read_byte(uint8_t* data){
+
+	while((SPI0->S & SPI_S_SPRF_MASK) != (SPI_S_SPRF_MASK)); //Wait until SPI read buffer flag is full
+
+	*data = SPI0->D; //Copy the data register into a variable
+}
+
+/*--------------------------------------------------------------------------------------------------------------------------*/
+/*
+  @brief: Send a single character into SPI0_D register
+ @param: Value that is to be sent
+ @return: None
+ */
+/*-----------------------------------------------------------------------------------------------------------------------------*/
+void SPI_write_byte(uint8_t data){
+
+	while((SPI0_S & SPI_S_SPTEF_MASK) !=(SPI_S_SPTEF_MASK)); //Wait until SPI transit buffer flag is set
+	SPI0->D=byte;
+
+}
+
+/*--------------------------------------------------------------------------------------------------------------------------*/
+/*
+  @brief: Send multibyte value via SPI
+ @param: *data: Pointer to value that is to be sent
+ 	 	 length: length of data that is to be sent.
+ @return: None
+ */
+/*-----------------------------------------------------------------------------------------------------------------------------*/
+void SPI_write_multibyte(uint8_t* data, size_t length)
+{
+	for(int i = 0; i < length ;i++)
+	{
+		SPI_write_byte(data[i]);
+	}
+}
+
+/*--------------------------------------------------------------------------------------------------------------------------*/
+/*
+  @brief: Read multibyte value via SPI
+ @param: *data: Buffer into which value is to be read
+ 	 	 length: length of buffer
+ @return: None
+ */
+/*-----------------------------------------------------------------------------------------------------------------------------*/
+void SPI_read_multibyte(uint8_t* data, size_t length)
+{
+	for(int i = 0; i < length ; i++)
+	{
+		SPI_read_byte(&data[i]);
+	}
+}
