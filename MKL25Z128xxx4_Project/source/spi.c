@@ -1,21 +1,9 @@
-/*
- * spi.c
- *
- *  Created on: Dec 4, 2021
- *      Author: mules
- */
 
 /***********************************************************************************
-* @file cbfifo.c
- * @brief:a fixed-size FIFO implemented via a circular buffer
- *        1)operation on fifo using circular buffer
- *        2)creating circular buffer
- *        3)enqueing of circular buffer
- *        4)Dequeing of circular buffer
- *        5)Returns the length of the circular buffer
- *        6)returns the capacity of the circular buffer
+* @file spi.c
+ * @brief:Initialise SPI peripheral, SPI read and write API
  * @author Sayali Mule
- * @date 09/05/2021
+ * @date 12/04/2021
  * @Reference:
  *
  *****************************************************************************/
@@ -92,8 +80,8 @@ void SPI_read_byte(uint8_t* data){
 /*-----------------------------------------------------------------------------------------------------------------------------*/
 void SPI_write_byte(uint8_t data){
 
-	while((SPI0_S & SPI_S_SPTEF_MASK) !=(SPI_S_SPTEF_MASK)); //Wait until SPI transit buffer flag is set
-	SPI0->D=byte;
+	while((SPI0->S & SPI_S_SPTEF_MASK) !=(SPI_S_SPTEF_MASK)); //Wait until SPI transit buffer flag is set
+	SPI0->D= data;
 
 }
 
