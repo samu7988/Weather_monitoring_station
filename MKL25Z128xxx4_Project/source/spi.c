@@ -11,6 +11,7 @@
 //                              Include files
 //***********************************************************************************
 #include "MKL25Z4.h"
+#include "gpio.h"
 
 //***********************************************************************************
 //                                  Macros
@@ -71,9 +72,14 @@ void spi_init()
 
 void SPI_read_byte(uint8_t* data){
 
+	gpio_off(SPI_CS_PORT, SPI_CS_PIN); //Turn CS low
+
 	while((SPI0->S & SPI_S_SPRF_MASK) != (SPI_S_SPRF_MASK)); //Wait until SPI read buffer flag is full
 
 	*data = SPI0->D; //Copy the data register into a variable
+
+	gpio_on(SPI_CS_PORT, SPI_CS_PIN); //Turn CS high
+
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------*/
@@ -85,8 +91,13 @@ void SPI_read_byte(uint8_t* data){
 /*-----------------------------------------------------------------------------------------------------------------------------*/
 void SPI_write_byte(uint8_t data){
 
+	gpio_off(SPI_CS_PORT, SPI_CS_PIN); //Turn CS low
+
 	while((SPI0->S & SPI_S_SPTEF_MASK) !=(SPI_S_SPTEF_MASK)); //Wait until SPI transit buffer flag is set
 	SPI0->D= data;
+
+	gpio_on(SPI_CS_PORT, SPI_CS_PIN); //Turn CS high
+
 
 }
 
