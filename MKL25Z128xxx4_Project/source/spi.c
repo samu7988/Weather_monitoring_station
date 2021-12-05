@@ -37,6 +37,12 @@
 
 void spi_init()
 {
+	 /*
+	  * PD0 -> CS
+	 * PD1 -> SCK
+	 * PD3 -> MISO
+	 * PD2 -> MOSI
+	 */
 
 	SIM->SCGC5 |=SIM_SCGC5_PORTD_MASK;// Enable clock to PORTD which has multiplexed SPI pins(Bit 12)
 	SIM->SCGC4 |=SIM_SCGC4_SPI0_MASK; //Enable clock to SPI0 module(Bit 22)
@@ -45,7 +51,6 @@ void spi_init()
 	PORTD->PCR[1] |= PORT_PCR_MUX(2); //PTD1->SCK
 	PORTD->PCR[3] |= PORT_PCR_MUX(2);  //PTD3->MISO
 	PORTD->PCR[2] |= PORT_PCR_MUX(2); //PTD2->MOSI
-	PORTD->PCR[0] |= PORT_PCR_MUX(1);//PTD0-> CS
 
 
 
