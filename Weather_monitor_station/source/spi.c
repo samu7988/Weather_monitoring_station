@@ -56,6 +56,8 @@ void spi_init()
 
 
 	SPI0->C1 |= SPI_C1_MSTR_MASK; //Enable master mode
+	SPI0->C1 &= ~(SPI_C1_CPHA_MASK); //Make CPOL 0
+	SPI0->C1 &= ~(SPI_C1_CPOL_MASK); //Make CPHA 0
 	SPI0->C2 &= ~(SPI_C2_MODFEN_MASK); //Make MODFEN bit to zero
 
 	SPI0->BR = (SPI_BR_SPPR(0x00) | SPI_BR_SPR(0x01)); //SPR(0x01)-> Baud rate divisor = 4, SPPR(0x00)->Prescalar divisor is 1
@@ -72,13 +74,11 @@ void spi_init()
 
 void SPI_read_byte(uint8_t* data){
 
-	gpio_off(SPI_CS_PORT, SPI_CS_PIN); //Turn CS low
 
 	while((SPI0->S & SPI_S_SPRF_MASK) != (SPI_S_SPRF_MASK)); //Wait until SPI read buffer flag is full
 
 	*data = SPI0->D; //Copy the data register into a variable
 
-	gpio_on(SPI_CS_PORT, SPI_CS_PIN); //Turn CS high
 
 }
 
@@ -89,16 +89,11 @@ void SPI_read_byte(uint8_t* data){
  @return: None
  */
 /*-----------------------------------------------------------------------------------------------------------------------------*/
-void SPI_write_byte(uint8_t data){
-
-	gpio_off(SPI_CS_PORT, SPI_CS_PIN); //Turn CS low
+void SPI_write_byte(uint8_t data)
+{
 
 	while((SPI0->S & SPI_S_SPTEF_MASK) !=(SPI_S_SPTEF_MASK)); //Wait until SPI transit buffer flag is set
 	SPI0->D= data;
-
-	gpio_on(SPI_CS_PORT, SPI_CS_PIN); //Turn CS high
-
-
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------*/
@@ -131,4 +126,53 @@ void SPI_read_multibyte(uint8_t* data, size_t length)
 	{
 		SPI_read_byte(&data[i]);
 	}
+}
+
+/*------------------------------------------------------------------------*/
+/*
+  @brief: Read a specific register using SPI
+ @param: reg_addr: Register addr that is to be read
+ 	 	 read_data: Pointer variable in which data is to be stored
+ @return: None
+ */
+/*-----------------------------------------------------------------------*/
+void SPI_read_register(uint8_t reg_addr,uint8_t* read_data)
+{
+	uint8_t dummy_data = 0;
+	gpio_off(SPI_CS_PORT, SPI_CS_PIN); //Turn CS low
+
+	SPI_write_byte(reg_addr); //Write reg addr
+
+	SPI_read_byte(&dummy_data); //read dummy data
+
+	SPI_write_byte(0xFF);
+
+	SPI_read_byte(read_data); //read data from specified reg. addr
+
+	gpio_on(SPI_CS_PORT, SPI_CS_PIN); //Turn CS high
+
+}
+
+/*------------------------------------------------------------------------*/
+/*
+  @brief: Write to a specific register using SPI
+ @param: reg_addr: Register addr that is to be read
+ 	 	 read_data: Pointer variable in which data is to be stored
+ @return: None
+ */
+/*-----------------------------------------------------------------------*/
+void SPI_write_register(uint8_t reg_addr, uint8_t data)
+{
+	uint8_t dummy_data = 0;
+	gpio_off(SPI_CS_PORT, SPI_CS_PIN); //Turn CS low
+
+	SPI_write_byte(reg_addr); //Write reg addr
+
+//	SPI_read_byte(&dummy_data); //Read dummy data
+
+	SPI_write_byte(data); //write data to specified reg. addr
+
+	SPI_read_byte(&dummy_data); //Read dummy data
+
+	gpio_on(SPI_CS_PORT, SPI_CS_PIN); //Turn CS high
 }

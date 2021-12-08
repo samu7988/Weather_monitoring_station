@@ -25,8 +25,8 @@ void SPI_read_byte(uint8_t* data);
 void SPI_write_byte(uint8_t data);
 void SPI_write_multibyte(uint8_t* data, size_t length);
 void SPI_read_multibyte(uint8_t* data, size_t length);
-
-
+void SPI_read_register(uint8_t reg_addr,uint8_t* read_data);
+void SPI_write_register(uint8_t reg_addr, uint8_t data);
 
 
 #endif /* SPI_H_ */

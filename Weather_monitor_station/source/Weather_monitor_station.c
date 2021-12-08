@@ -29,7 +29,7 @@
  */
  
 /**
- * @file    MKL25Z128xxx4_Project.c
+ * @file    Weather_monitor_station.c
  * @brief   Application entry point.
  */
 #include <stdio.h>
@@ -39,6 +39,9 @@
 #include "clock_config.h"
 #include "MKL25Z4.h"
 #include "fsl_debug_console.h"
+#include "gpio.h"
+#include "bme280.h"
+#include "spi.h"
 /* TODO: insert other include files here. */
 
 /* TODO: insert other definitions and declarations here. */
@@ -57,16 +60,27 @@ int main(void) {
     BOARD_InitDebugConsole();
 #endif
 
-    PRINTF("Hello World\n");
+    gpio_init();
+    spi_init();
 
+    PRINTF("Hello World\n");
+    uint8_t data = 0;
     /* Force the counter to be placed into memory. */
     volatile static int i = 0 ;
     /* Enter an infinite loop, just incrementing a counter. */
-    while(1) {
-        i++ ;
-        /* 'Dummy' NOP to allow source level single stepping of
-            tight while() loop */
-        __asm volatile ("nop");
+    while(1)
+    {
+        SPI_read_register(BME280_CHIP_ID_REG , &data);
+
+//        printf("%x\n",data);
     }
     return 0 ;
+//	gpio_off(SPI_CS_PORT, SPI_CS_PIN); //Turn CS low
+//	for(int i =0; i < 65535;i++);
+//	for(int i =0; i < 65535;i++);
+//	for(int i =0; i < 65535;i++);
+//	gpio_on(SPI_CS_PORT, SPI_CS_PIN);
+//	for(int i =0; i < 65535;i++);
+//	for(int i =0; i < 65535;i++);
+//	for(int i =0; i < 65535;i++);
 }
