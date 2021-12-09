@@ -1,4 +1,3 @@
-
 /***********************************************************************************
 * @file spi.c
  * @brief:Initialise SPI peripheral, SPI read and write API
@@ -89,16 +88,11 @@ void SPI_read_byte(uint8_t* data){
  @return: None
  */
 /*-----------------------------------------------------------------------------------------------------------------------------*/
-uint8_t SPI_write_byte(uint8_t data)
+void SPI_write_byte(uint8_t data)
 {
 
-	while((SPI0->S & SPI_S_SPTEF_MASK) !=(SPI_S_SPTEF_MASK)); //Wait until SPI transit buffer is empty
+	while((SPI0->S & SPI_S_SPTEF_MASK) !=(SPI_S_SPTEF_MASK)); //Wait until SPI transit buffer flag is set
 	SPI0->D= data;
-	while((SPI0->S & SPI_S_SPRF_MASK) != (SPI_S_SPRF_MASK)); //Wait until Tx is complete
-	uint8_t dummy = SPI0->D;
-	return dummy;
-
-
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------*/
@@ -129,7 +123,7 @@ void SPI_read_multibyte(uint8_t* data, size_t length)
 {
 	for(int i = 0; i < length ; i++)
 	{
-		SPI_read_register(&data[i]);
+		SPI_read_byte(&data[i]);
 	}
 }
 
@@ -148,11 +142,11 @@ void SPI_read_register(uint8_t reg_addr,uint8_t* read_data)
 
 	SPI_write_byte(reg_addr); //Write reg addr
 
-//	SPI_read_byte(&dummy_data); //read dummy data
+	SPI_read_byte(&dummy_data); //read dummy data
 
-	*read_data =  SPI_write_byte(0xFF);
+	SPI_write_byte(0xFF);
 
-//	SPI_read_byte(read_data); //read data from specified reg. addr
+	SPI_read_byte(read_data); //read data from specified reg. addr
 
 	gpio_on(SPI_CS_PORT, SPI_CS_PIN); //Turn CS high
 
@@ -168,11 +162,16 @@ void SPI_read_register(uint8_t reg_addr,uint8_t* read_data)
 /*-----------------------------------------------------------------------*/
 void SPI_write_register(uint8_t reg_addr, uint8_t data)
 {
+	uint8_t dummy_data = 0;
 	gpio_off(SPI_CS_PORT, SPI_CS_PIN); //Turn CS low
 
-	SPI_write_byte(reg_addr); //Write reg addr
+	SPI_write_byte(reg_addr & 0x7F); //Write reg addr
+
+	SPI_read_byte(&dummy_data); //Read dummy data
 
 	SPI_write_byte(data); //write data to specified reg. addr
+
+	SPI_read_byte(&dummy_data); //Read dummy data
 
 	gpio_on(SPI_CS_PORT, SPI_CS_PIN); //Turn CS high
 }

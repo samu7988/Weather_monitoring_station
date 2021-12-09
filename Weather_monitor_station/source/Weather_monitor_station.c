@@ -80,18 +80,22 @@ int main(void) {
 
 //	SPI_read_register(BME280_CHIP_ID_REG , &data);
 
+	printf("%x\n",chip_id);
+    SPI_write_register(BME280_CONFIG_REG,0x3);
+	SPI_read_register(BME280_CONFIG_REG , &data);
 	printf("%x\n",data);
-//    SPI_write_register(BME280_CONFIG_REG,0xC);
-//	SPI_read_register(BME280_CONFIG_REG , &data);
-//	printf("%x\n",data);
     /* Enter an infinite loop, just incrementing a counter. */
     while(1)
     {
 //        SPI_read_register(BME280_CHIP_ID_REG , &data);
 //
-    	    SPI_write_register(BME280_CONFIG_REG,0x3);
-			SPI_read_register(BME280_CONFIG_REG , &data);
-    	    	        printf("%x\n",data);
+//    	    SPI_write_register(BME280_CONFIG_REG,0x3);
+//
+//    	    for(int i = 0; i < 65000; i++);
+//    	    for(int i = 0; i < 65000; i++);
+//
+//			SPI_read_register(BME280_CONFIG_REG , &data);
+//    	    	        printf("%x\n",data);
 
 
     }

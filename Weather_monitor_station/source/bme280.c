@@ -29,7 +29,7 @@ int32_t t_fine = 0;
 //***********************************************************************************
 uint8_t bme280_init()
 {
-//	uint8_t standby = 0; //0.5ms
+	uint8_t standby = 0; //0.5ms
 //	uint8_t filter = 0; //Filter off
 //	uint8_t temp_over_sample = 1;
 //	uint8_t press_over_sample = 1;
@@ -37,6 +37,7 @@ uint8_t bme280_init()
 //
 //	//Most of the time the sensor will be init with default values
 //	//But in case user has old/deprecated code, use the settings.x values
+	uint8_t read_data = 0;
 //	set_standby_time(standby);
 //	set_filter(filter);
 //	set_pressure_oversample(press_over_sample); //Default of 1x oversample
@@ -45,7 +46,7 @@ uint8_t bme280_init()
 //
 //	set_mode(MODE_NORMAL); //Go!
 
-	uint8_t read_data = 0;
+
 	SPI_read_register(BME280_CHIP_ID_REG, &read_data);
 	return read_data; //Should return 0x60
 }
@@ -168,6 +169,9 @@ void set_mode(uint8_t mode)
 	control_data &= ~( (1<<1) | (1<<0) ); //Clear the mode[1:0] bits
 	control_data |= mode; //Set
 	SPI_write_register(BME280_CTRL_MEAS_REG, control_data);
+	SPI_read_register(BME280_CTRL_MEAS_REG,&control_data);
+	int x = 0;
+
 }
 
 //Set the pressure oversample value
