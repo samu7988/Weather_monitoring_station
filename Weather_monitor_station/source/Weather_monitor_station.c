@@ -63,24 +63,38 @@ int main(void) {
     gpio_init();
     spi_init();
 
-    PRINTF("Hello World\n");
+    uint8_t chip_id = bme280_init();
+    if(chip_id != 0x60)
+    {
+    	printf("The sensor did not respond with correct chip id val,Please check\n\r");
+    }
+    else
+    {
+    	printf("BME280 sensor initialisation is successfull\n\r");
+    }
     uint8_t data = 0;
     /* Force the counter to be placed into memory. */
     volatile static int i = 0 ;
+
+
+
+//	SPI_read_register(BME280_CHIP_ID_REG , &data);
+
+	printf("%x\n",data);
+//    SPI_write_register(BME280_CONFIG_REG,0xC);
+//	SPI_read_register(BME280_CONFIG_REG , &data);
+//	printf("%x\n",data);
     /* Enter an infinite loop, just incrementing a counter. */
     while(1)
     {
-        SPI_read_register(BME280_CHIP_ID_REG , &data);
+//        SPI_read_register(BME280_CHIP_ID_REG , &data);
+//
+    	    SPI_write_register(BME280_CONFIG_REG,0x3);
+			SPI_read_register(BME280_CONFIG_REG , &data);
+    	    	        printf("%x\n",data);
 
-//        printf("%x\n",data);
+
     }
     return 0 ;
-//	gpio_off(SPI_CS_PORT, SPI_CS_PIN); //Turn CS low
-//	for(int i =0; i < 65535;i++);
-//	for(int i =0; i < 65535;i++);
-//	for(int i =0; i < 65535;i++);
-//	gpio_on(SPI_CS_PORT, SPI_CS_PIN);
-//	for(int i =0; i < 65535;i++);
-//	for(int i =0; i < 65535;i++);
-//	for(int i =0; i < 65535;i++);
+
 }

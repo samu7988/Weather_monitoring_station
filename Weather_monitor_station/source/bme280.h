@@ -71,8 +71,15 @@
 //***********************************************************************************
 //                                  Function Prototype
 //***********************************************************************************
-
-
+uint8_t bme280_init();
+void set_standby_time(uint8_t timeSetting);
+void set_filter(uint8_t filter_setting);
+void set_temp_oversample(uint8_t over_sample_amount);
+uint8_t check_sample_value(uint8_t user_value);
+uint8_t get_mode();
+void set_mode(uint8_t mode);
+void set_pressure_oversample(uint8_t over_sample_amount);
+void set_humidity_oversample(uint8_t over_sample_amount);
 
 
 
