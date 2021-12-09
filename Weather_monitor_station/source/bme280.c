@@ -70,6 +70,8 @@ void set_standby_time(uint8_t timeSetting)
 	control_data &= ~( (1<<7) | (1<<6) | (1<<5) ); //Clear the 7/6/5 bits
 	control_data |= (timeSetting << 5); //Align with bits 7/6/5
 	SPI_write_register(BME280_CONFIG_REG, control_data);
+	SPI_read_register(BME280_CONFIG_REG,&control_data);
+	int x = 0;
 }
 
 //Set the filter bits in the config register

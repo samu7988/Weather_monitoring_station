@@ -1,31 +1,38 @@
 /***********************************************************************************
-* @file gpio.h
- * @brief:Initialise GPIO, GPIO turn on, GPIO turn off
+* @file systick.h
+ * @brief:Setup the systick peripheral and its interrupt handler
  * @author Sayali Mule
- * @date 12/04/2021
- * @Reference:
+ * @date 10/06/2021
+ * @Reference:https://nicopinkowski.wordpress.com/intro-into-arm-cortex-m0-systick-timer/
+ *
  *****************************************************************************/
-#ifndef GPIO_H_
-#define GPIO_H_
+#ifndef _SYSTICK_H_
+#define _SYSTICK_H_
+
 //***********************************************************************************
 //                              Include files
 //***********************************************************************************
-#include <stdint.h>
 #include "MKL25Z4.h"
+
+
+
+
 //***********************************************************************************
 //                                  Macros
 //***********************************************************************************
-#define SPI_CS_PORT	(GPIOD)
-#define SPI_CS_PIN  (0)
-
-#define GREEN_LED_PORT  (GPIOB)
-#define GREEN_LED_PIN   (19)
+typedef uint32_t ticktime_t;
 
 //***********************************************************************************
-//                                  Function Prototype
+//                                  Enum
 //***********************************************************************************
-void gpio_init();
-void gpio_on(GPIO_Type* port, uint8_t pin);
-void gpio_off(GPIO_Type* port, uint8_t pin);
-void gpio_toggle(GPIO_Type* port, uint8_t pin);
-#endif /* GPIO_H_ */
+extern uint32_t count_100ms;
+
+
+//***********************************************************************************
+//                                  Structure
+//***********************************************************************************
+
+void systick_init(uint32_t delay_ms);
+
+
+#endif // _GPIO_H

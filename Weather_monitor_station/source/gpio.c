@@ -43,6 +43,13 @@ void gpio_init()
 	PORTD->PCR[0] |= PORT_PCR_MUX(1);//PTD0-> CS, ALT1 functionality
 	GPIOD->PDDR |= GPIO_PDDR_PDD(1); //Set as output pin
 	gpio_on(SPI_CS_PORT, SPI_CS_PIN); //Make CS default high
+
+	SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;
+	PORTB->PCR[19] |= PORT_PCR_MUX(1);
+	GPIOB->PDDR |= 0x80000; //Set as output pin
+	gpio_off(GREEN_LED_PORT, GREEN_LED_PIN); //Make LED high
+
+
 }
 
 /*-----------------------------------------------------------------------------------------------------------------------------*/
@@ -67,4 +74,9 @@ void gpio_on(GPIO_Type* port, uint8_t pin)
 void gpio_off(GPIO_Type* port, uint8_t pin)
 {
 	port->PCOR  = (1 << pin);
+}
+
+void gpio_toggle(GPIO_Type* port, uint8_t pin)
+{
+	port->PTOR = (1 << pin);
 }
