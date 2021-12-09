@@ -53,12 +53,12 @@ void SysTick_Handler(void){
  @Reference:
  -------------------------------------------------------------------------------*/
 
-void systick_init(uint32_t delay_ms)
+void systick_init()
 {
 
 
-	SysTick->LOAD = (48000000L)/4;
-	NVIC_SetPriority(SysTick_IRQn, 3);
+	SysTick->LOAD = (48000000L)/16;
+//	NVIC_SetPriority(SysTick_IRQn, 3);
 	SysTick->VAL = 0;
 	SysTick->CTRL = SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk;
 }
