@@ -14,6 +14,13 @@
 //***********************************************************************************
 //                                  Macros
 //***********************************************************************************
+typedef struct
+{
+	uint8_t temp_val;
+	uint8_t pressure_val;
+	uint8_t hum_val;
+}sensor_val_t;
+
 #define MODE_SLEEP 0b00
 #define MODE_FORCED 0b01
 #define MODE_NORMAL 0b11
@@ -80,7 +87,8 @@ uint8_t get_mode();
 void set_mode(uint8_t mode);
 void set_pressure_oversample(uint8_t over_sample_amount);
 void set_humidity_oversample(uint8_t over_sample_amount);
-
+void read_sensors(sensor_val_t* sensor_val);
+void transmit_sensors_val(sensor_val_t* sensor_val);
 
 
 #endif /* BME280_H_ */

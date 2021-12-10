@@ -13,6 +13,7 @@
 #include "MKL25Z4.h"
 #include "spi.h"
 #include "bme280.h"
+#include "uart.h"
 
 //***********************************************************************************
 //                                  Macros
@@ -275,4 +276,21 @@ float read_temp_f( void )
 	output = (output * 9) / 5 + 32;
 
 	return output;
+}
+
+
+void read_sensors(sensor_val_t* sensor_val)
+{
+ //TODO: read the values of temperature, humidity and pressure
+	sensor_val->temp_val = 25;
+	sensor_val->pressure_val = 5;
+	sensor_val->hum_val = 7;
+}
+
+void transmit_sensors_val(sensor_val_t* sensor_val)
+{
+	//TODO: Send value of sensors via Bluetooth to mobile application
+	uart1_puts((uint8_t*)"T:\n");
+	uart1_puts((uint8_t*)"P:\n");
+	uart1_puts((uint8_t*)"H:\n");
 }

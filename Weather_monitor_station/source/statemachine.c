@@ -1,66 +1,89 @@
 /***********************************************************************************
-* @file   systick.c
- * @brief: Sets systick peripheral and its interrupt service routine
+* @file statemachine.c
+ * @brief:Build a state machine that can handle and process various events and states
  * @author Sayali Mule
- * @date 10/06/2021
- * @Reference:https://github.com/alexander-g-dean/ESF/blob/master/NXP/Misc/Touch%20Sense/TSI/src/main.c
+ * @date 12/04/2021
+ * @Reference:
  *
  *****************************************************************************/
-
 //***********************************************************************************
 //                              Include files
 //***********************************************************************************
 #include "MKL25Z4.h"
-#include "systick.h"
 #include "gpio.h"
+#include "bme280.h"
 #include "statemachine.h"
-#include "fsl_debug_console.h"
-
 //***********************************************************************************
 //                                  Macros
 //***********************************************************************************
-
-
-
 //***********************************************************************************
-//                                  Enum
+//                              Structures
 //***********************************************************************************
 
 
+event_e event;
+state_e state = STATE_IDLE;
+sensor_val_t sensor_val = {0};
+
 //***********************************************************************************
-//                                  Structure
+//                                  Function definition
 //***********************************************************************************
-
-/*-----------------------------------------------------------------------------------------------------------------------------*/
-/*
- @brief: Systick Interrupt handler
-@param: None
- @return:None
- @Reference:
--------------------------------------------------*/
-void SysTick_Handler(void){
-
-	set_timer_event();
-}
-
-/*-----------------------------------------------------------------------------------------------------------------------------*/
-/*
- @brief: Initialise the systick peripheral
-@param: delay_ms: Can only count uptil 349msec
- @return:None
- @Reference:
- -------------------------------------------------------------------------------*/
-
-void systick_init()
+void set_timer_event()
 {
-
-
-	SysTick->LOAD = (48000000L)/4;
-	NVIC_SetPriority(SysTick_IRQn, 3);
-	SysTick->VAL = 0;
-	SysTick->CTRL = SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk;
+	event |= TIMER_EVENT;
 }
 
+event_e get_event()
+{
+	event_e temp_event = 0;
+	if(event & TIMER_EVENT)
+	{
+		temp_event = TIMER_EVENT;
+		event &= ~(TIMER_EVENT);
+	}
 
+	return temp_event;
+}
+/*-----------------------------------------------------------------------------------------------------------------------------*/
+/*
+ @brief: State machine to manage weather monitoring station
+ @param: None
+ @return:None
+ */
+/*-----------------------------------------------------------------------------------------------------------------------------*/
+void weather_monitor_statemachine()
+{
+	//Get event
+	event_e event = get_event();
+
+	switch(state)
+	{
+
+		case STATE_IDLE:
+		{
+			if(event == TIMER_EVENT)
+			{
+				state = STATE_READ_SENSORS;
+			}
+		}
+		break;
+
+		case STATE_READ_SENSORS:
+		{
+			read_sensors(&sensor_val);
+
+			state = STATE_TRANSMIT_VAL;
+		}
+		break;
+
+		case STATE_TRANSMIT_VAL:
+		{
+			transmit_sensors_val(&sensor_val);
+			state = STATE_IDLE;
+		}
+		break;
+	}
+
+}
 
 

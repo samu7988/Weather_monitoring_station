@@ -41,26 +41,45 @@ void UART0_IRQHandler(void)
 		rcvd_val = UART0->D;
 		cb_status = cbfifo_enqueue(RX_BUFFER,&rcvd_val); //Enqueue the received data into Rx buffer(accessed via handler)
 	}
-	else if((UART0->S1 & UART0_S1_TDRE_MASK)) //when data register is empty
-	{
-		uint8_t tx_val = 0;
-		//if previous trasnmission is complete, then dequeue a character from Tx buffer and start with another transmission
-		if(UART0->S1 & UART0_S1_TC_MASK){
-			cb_status = cbfifo_dequeue(TX_BUFFER, &tx_val);
+//	else if((UART0->S1 & UART0_S1_TDRE_MASK)) //when data register is empty
+//	{
+//		uint8_t tx_val = 0;
+//		//if previous trasnmission is complete, then dequeue a character from Tx buffer and start with another transmission
+//		if(UART0->S1 & UART0_S1_TC_MASK){
+//			cb_status = cbfifo_dequeue(TX_BUFFER, &tx_val);
+//
+//			//Only proceed with transmission if circular buffer is not empty
+//			if(cb_status != CB_EMPTY && cb_status != CB_INSTANCE_ERROR)
+//			{
+//				UART0->D = tx_val;
+//				UART0->C2 &= ~UART0_C2_TIE(1); ///Disable transmit interrupt
+//			}
+//			else if(cb_status == CB_INSTANCE_ERROR){
+//				//Handle errors
+//			}
+//		}
+//
+//
+//	}
 
-			//Only proceed with transmission if circular buffer is not empty
-			if(cb_status != CB_EMPTY && cb_status != CB_INSTANCE_ERROR)
-			{
-				UART0->D = tx_val;
-				UART0->C2 &= ~UART0_C2_TIE(1); ///Disable transmit interrupt
-			}
-			else if(cb_status == CB_INSTANCE_ERROR){
-				//Handle errors
-			}
-		}
+	 if((UART0->C2 & UART0_C2_TIE_MASK) &&
+	    (UART0->S1 & UART0_S1_TDRE_MASK)){
+			uint8_t tx_val = 0;
+			  //Can sen another character
+				cb_status = cbfifo_dequeue(TX_BUFFER, &tx_val);
 
+				//Only proceed with transmission if circular buffer is not empty
+				if(cb_status != CB_EMPTY && cb_status != CB_INSTANCE_ERROR)
+				{
+					UART0->D = tx_val;
+				}
+			  else{
+			   //queue is empty so disable transmitter interrupt
+			   UART0->C2 &= ~UART0_C2_TIE_MASK;
+			  }
 
-	}
+	 }
+
 
 	__enable_irq();
 }
@@ -132,7 +151,7 @@ int __sys_readc(void)
  @return: None
  */
 /*-----------------------------------------------------------------------------------------------------------------------------*/
-void uart_init()
+void uart0_init()
 {
 
 	/******************************************************************
@@ -149,14 +168,16 @@ void uart_init()
 
 	//set UART clock to  24 MHz clock
 	SIM->SOPT2 |= SIM_SOPT2_UART0SRC(1); //select clock source as PLL/2 or FLL
-	SIM->SOPT2 &= ~SIM_SOPT2_PLLFLLSEL_MASK; //set FLL as clock source
+//	SIM->SOPT2 &= ~SIM_SOPT2_PLLFLLSEL_MASK; //set FLL as clock source
+	SIM->SOPT2 |= SIM_SOPT2_PLLFLLSEL_MASK; //set FLL as clock source
+
 
 	//set pins to UART0 Rx and Tx
 	PORTA->PCR[1] = PORT_PCR_ISF_MASK | PORT_PCR_MUX(2); //Rx
 	PORTA->PCR[2] = PORT_PCR_ISF_MASK | PORT_PCR_MUX(2); //Tx
 
 	//Set baud rate and oversampling ratio
-	sbr = (uint16_t)((SYSCLOCK_FREQUENCY)/(BAUD_RATE * UART_OVERSAMPLE_RATE));
+	sbr = (uint16_t)((48000000)/(38400 * UART_OVERSAMPLE_RATE));
 	UART0->BDH &= ~UART0_BDH_SBR_MASK;
 	UART0->BDH |= UART0_BDH_SBR(sbr>>8);
 	UART0->BDL = UART0_BDL_SBR(sbr);
@@ -167,8 +188,6 @@ void uart_init()
 
 	//Don't enable loopback mode, use 8 data bit mode, don't use parity
 	UART0->C1 = UART0_C1_LOOPS(0) | UART0_C1_M(DATA_BITS) | UART0_C1_PE(PARITY);
-
-
 
 	//send LSB first
 	UART0->S2 = UART0_S2_MSBF(0);
@@ -183,30 +202,29 @@ void uart_init()
 	UART0->C2 = 0;
 	UART0->C2 |=  UART0_C2_RIE(1);
 
+}
+
+void uart1_init()
+{
 	/******************************************************************
 	 * 					UART1 INITIALISATION(PTE1->Rx, PTE0->Tx)
 	 ******************************************************************/
-	//Enable clock gating for UART0 and Port A
+	uint16_t sbr = 0;
+	//Enable clock gating for UART0 and Port E
 	SIM->SCGC4 |= SIM_SCGC4_UART1_MASK;
-	UART1->C2 &= ~UART_C2_TE_MASK & ~UART_C2_RE_MASK;
-//	UART2->BDH = 0x00;
-//	UART2->BDL = 0x5B; /* 9600 Baud */
+	SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK; /* enable clock to PORTE */
+	PORTE->PCR[0] = PORT_PCR_MUX(3); /* PTE0 for UART2 transmit */
+	UART1->C2 = 0;
 
-	sbr = (uint16_t)((SYSCLOCK_FREQUENCY)/(9600 * UART_OVERSAMPLE_RATE));
+	sbr = (uint16_t)((SYSCLOCK_FREQUENCY)/(9600 * UART_OVERSAMPLE_RATE)); //313 or 0x139
 	UART1->BDH &= ~UART_BDH_SBR_MASK;
 	UART1->BDH |= UART_BDH_SBR(sbr>>8);
 	UART1->BDL = UART_BDL_SBR(sbr);
-//	UART1->C4 |= UART_C4_OSR(UART_OVERSAMPLE_RATE - 1);
 
 	UART1->C1 = 0x00; /* normal 8-bit, no parity */
 	UART1->C3 = 0x00; /* no fault interrupt */
-	UART1->C2 |= UART_C2_TE(1) | UART_C2_RE(1);
-	SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK; /* enable clock to PORTE */
-	PORTE->PCR[1] = PORT_PCR_MUX(3); /* PTD5 for UART2 transmit */
-	PORTE->PCR[0] = PORT_PCR_MUX(3); /* PTD5 for UART2 receive */
-
+	UART1->C2 |= UART_C2_TE(1) ;
 }
-
 /*-----------------------------------------------------------------------------------------------------------------------------*/
 /*
  @brief: Send message through UART1
@@ -216,12 +234,14 @@ void uart_init()
 /*-------------------------------------------------------------------------*/
 void uart1_puts(uint8_t* msg)
 {
+	//__disable_irq();
 	uint8_t i = 0;
 	while(msg[i] != '\0')
 	{
-		while(!(UART1->S1 & UART0_S1_TDRE_MASK)); /* wait for transmit buffer empty */
-		UART2->D = msg[i];
+		while(!(UART1->S1 & UART_S1_TDRE_MASK)); /* wait for transmit buffer empty */
+		UART1->D = msg[i];
 		i++;
 	}
+	//__enable_irq();
 }
 

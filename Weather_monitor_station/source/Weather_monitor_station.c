@@ -46,7 +46,9 @@
 #include "sysclock.h"
 #include "cbfifo.h"
 #include "systick.h"
+#include "statemachine.h"
 
+#define ENABLE_LOGGING (1)
 /* TODO: insert other include files here. */
 
 /* TODO: insert other definitions and declarations here. */
@@ -65,27 +67,18 @@ int main(void) {
 //    BOARD_InitDebugConsole();
 #endif
     int status = 0;
-    sysclock_init();
+
+//    sysclock_init();
+	uart0_init();
+//
 	gpio_init();
     spi_init();
-    uart_init();
-    PRINTF("Hello world!!\n\r");
+
+    uart1_init();
     systick_init();
+
     //Create the Tx handle that points to tx buffer(statically allocated)
     status |= create_tx_cb_handle();
-    if(status)
-    {
-  	  //Handle the error
-  	  printf("Error while initialising Tx buffer\n\r");
-    }
-
-    //Create the Rx handle that points to Rx buffer(statically allocated)
-    status |= create_rx_cb_handle();
-    if(status)
-    {
-  	  printf("Error while initialising Rx buffer\n\r");
-    }
-
 
     /*
      * SPI coding
@@ -104,12 +97,14 @@ int main(void) {
     volatile static int i = 0 ;
 
 	printf("%x\n",chip_id);
-
-	printf("%x\n",data);
-
+//
     /* Enter an infinite loop, just incrementing a counter. */
     while(1)
     {
+//    	uart1_puts("Vikrant\n\r");
+    	weather_monitor_statemachine();
+//		for(int k = 0; k < 10; k++)
+//			for(int j = 0; j < 7000; j++);
     	//    SPI_write_register(BME280_CONFIG_REG,0x3);
     	//	SPI_read_register(BME280_CONFIG_REG , &data);
     }

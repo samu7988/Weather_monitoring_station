@@ -43,7 +43,11 @@ cb_error_status_e create_tx_cb_handle()
 {
 	cb_error_status_e status = 0;
 	status = create_cb_instance(TX_BUFFER,tx_buffer, NUM_BYTES);
-
+    if(status)
+    {
+  	  //Handle the error
+  	  printf("Error while initialising Tx buffer\n\r");
+    }
 	return status;
 }
 
@@ -51,7 +55,11 @@ cb_error_status_e create_rx_cb_handle()
 {
 	cb_error_status_e status = 0;
 	status = create_cb_instance(RX_BUFFER,rx_buffer, NUM_BYTES);
-
+    if(status)
+    {
+  	  //Handle the error
+  	  printf("Error while initialising Rx buffer\n\r");
+    }
 	return status;
 }
 /*-----------------------------------------------------------------------------------------------------------------------------*/

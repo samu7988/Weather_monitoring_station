@@ -1,29 +1,35 @@
 /***********************************************************************************
-* @file uart.h
- * @brief: Contains code to initialise UART, and uart Tx and Rx
+* @file statemachine.h
+ * @brief:Contains weather monitor statemachine and routines for scheduling events
  * @author Sayali Mule
- * @date 11/03/2021
+ * @date 12/04/2021
  * @Reference:
- *
  *****************************************************************************/
-#ifndef UART_H_
-#define UART_H_
+#ifndef STATEMACHINE_H_
+#define STATEMACHINE_H_
 //***********************************************************************************
 //                              Include files
 //***********************************************************************************
-#include <stdint.h>
+
 //***********************************************************************************
 //                                  Macros
 //***********************************************************************************
+typedef enum
+{
+	TIMER_EVENT = 1,
+}event_e;
 
-
+typedef enum
+{
+	STATE_IDLE = 1,
+	STATE_READ_SENSORS = 2,
+	STATE_TRANSMIT_VAL =  4
+}state_e;
 
 //***********************************************************************************
 //                                  Function Prototype
 //***********************************************************************************
-void uart0_init();
-void uart1_init();
-void uart1_puts(uint8_t* msg);
-
-
-#endif /* UART_H_ */
+void set_timer_event();
+event_e get_event();
+void weather_monitor_statemachine();
+#endif /* STATEMACHINE_H_ */
