@@ -98,11 +98,15 @@ int main(void) {
 
 	printf("%x\n",chip_id);
 //
+	    SPI_write_register(BME280_CTRL_MEAS_REG,0x3);
+		SPI_read_register(BME280_CTRL_MEAS_REG , &data);
+		printf("%x\n",data);
+
     /* Enter an infinite loop, just incrementing a counter. */
     while(1)
     {
 //    	uart1_puts("Vikrant\n\r");
-    	weather_monitor_statemachine();
+//    	weather_monitor_statemachine();
 //		for(int k = 0; k < 10; k++)
 //			for(int j = 0; j < 7000; j++);
     	//    SPI_write_register(BME280_CONFIG_REG,0x3);
