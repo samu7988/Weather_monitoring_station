@@ -175,3 +175,34 @@ void SPI_write_register(uint8_t reg_addr, uint8_t data)
 
 	gpio_on(SPI_CS_PORT, SPI_CS_PIN); //Turn CS high
 }
+
+/*------------------------------------------------------------------------*/
+/*
+  @brief: Read a specific register using SPI
+ @param: reg_addr: Register addr that is to be read
+ 	 	 read_data: Pointer variable in which data is to be stored
+ @return: None
+ */
+/*-----------------------------------------------------------------------*/
+void SPI_multibyte_read_register(uint8_t reg_addr,uint8_t* read_data, uint8_t num_regs)
+{
+	uint8_t dummy_data = 0;
+	gpio_off(SPI_CS_PORT, SPI_CS_PIN); //Turn CS low
+
+	for(uint8_t i = 0; i < num_regs; i++)
+	{
+		SPI_write_byte(reg_addr); //Write reg addr
+
+		SPI_read_byte(&dummy_data); //read dummy data
+
+		SPI_write_byte(0xFF);
+
+		SPI_read_byte(&read_data[i]); //read data from specified reg. addr
+
+		reg_addr += 1; //Next reg address
+	}
+
+
+	gpio_on(SPI_CS_PORT, SPI_CS_PIN); //Turn CS high
+
+}

@@ -90,5 +90,7 @@ void set_humidity_oversample(uint8_t over_sample_amount);
 void read_sensors(sensor_val_t* sensor_val);
 void transmit_sensors_val(sensor_val_t* sensor_val);
 
-
+float read_float_humidity( void );
+float read_temp_C( void );
+float readFloatPressure( void );
 #endif /* BME280_H_ */

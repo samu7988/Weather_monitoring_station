@@ -225,6 +225,7 @@ float read_temp_C( void )
 
 	//get the reading (adc_T);
     uint8_t buffer[3];
+
     SPI_read_register(BME280_TEMPERATURE_MSB_REG, &buffer[0]);
     SPI_read_register(BME280_TEMPERATURE_LSB_REG, &buffer[1]);
     SPI_read_register(BME280_TEMPERATURE_XLSB_REG, &buffer[2]);
@@ -235,21 +236,21 @@ float read_temp_C( void )
 	uint16_t T1_LSB = 0;
 	uint16_t T1 = 0;
 	SPI_read_register(BME280_DIG_T1_MSB_REG, &T1_MSB);
-	SPI_read_register(BME280_DIG_T1_MSB_REG, &T1_LSB);
+	SPI_read_register(BME280_DIG_T1_LSB_REG, &T1_LSB);
 	T1 = (T1_MSB << 8) | (T1_LSB);
 
 	uint16_t T2_MSB = 0;
 	uint16_t T2_LSB = 0;
 	uint16_t T2 = 0;
 	SPI_read_register(BME280_DIG_T2_MSB_REG, &T2_MSB);
-	SPI_read_register(BME280_DIG_T2_MSB_REG, &T2_LSB);
+	SPI_read_register(BME280_DIG_T2_LSB_REG, &T2_LSB);
 	T2 = (T2_MSB << 8) | (T2_LSB);
 
 	uint16_t T3_MSB = 0;
 	uint16_t T3_LSB = 0;
 	uint16_t T3 = 0;
 	SPI_read_register(BME280_DIG_T3_MSB_REG, &T3_MSB);
-	SPI_read_register(BME280_DIG_T3_MSB_REG, &T3_LSB);
+	SPI_read_register(BME280_DIG_T3_LSB_REG, &T3_LSB);
 	T3 = (T3_MSB << 8) | (T3_LSB);
 
 	//By datas																																																				heet, calibrate
@@ -266,14 +267,162 @@ float read_temp_C( void )
 	return output;
 }
 
-float read_temp_f( void )
+float read_float_humidity( void )
 {
-	float output = read_temp_C();
-	output = (output * 9) / 5 + 32;
 
+	// Returns humidity in %RH as unsigned 32 bit integer in Q22. 10 format (22 integer and 10 fractional bits).
+	// Output value of “47445” represents 47445/1024 = 46. 333 %RH
+    uint8_t buffer[2];
+	SPI_read_register(BME280_HUMIDITY_MSB_REG, &buffer[0]);
+	SPI_read_register(BME280_HUMIDITY_LSB_REG, &buffer[1]);
+
+    int32_t adc_H = ((uint32_t)buffer[0] << 8) | ((uint32_t)buffer[1]);
+
+	int32_t var1;
+	var1 = (t_fine - ((int32_t)76800));
+
+
+	uint8_t H1 = 0;
+	SPI_read_register(BME280_DIG_H1_REG, &H1);
+
+	uint16_t H2_MSB = 0;
+	uint16_t H2_LSB = 0;
+	uint16_t H2 = 0;
+	SPI_read_register(BME280_DIG_H2_MSB_REG, &H2_MSB);
+	SPI_read_register(BME280_DIG_H2_LSB_REG, &H2_LSB);
+	H2 = (H2_MSB << 8) | (H2_LSB);
+
+	uint8_t H3 = 0;
+	SPI_read_register(BME280_DIG_H3_REG, &H3);
+
+	uint16_t H4_MSB = 0;
+	uint16_t H4_LSB = 0;
+	uint16_t H4 = 0;
+	SPI_read_register(BME280_DIG_H4_MSB_REG, &H4_MSB);
+	SPI_read_register(BME280_DIG_H4_LSB_REG, &H4_LSB);
+	H4 = (H4_MSB << 4) | (H4_LSB & 0x0F);
+
+	uint16_t H5_MSB = 0;
+	uint16_t H5_LSB = 0;
+	uint16_t H5 = 0;
+	SPI_read_register(BME280_DIG_H5_MSB_REG, &H5_MSB);
+	SPI_read_register(BME280_DIG_H4_LSB_REG, &H5_LSB);
+	H5 = (H5_MSB << 4) | ((H5_LSB >> 4) & 0x0F);
+
+	uint8_t H6 = 0;
+	SPI_read_register(BME280_DIG_H6_REG, &H6);
+
+
+
+	var1 = (((((adc_H << 14) - (((int32_t)H4) << 20) - (((int32_t)H5) * var1)) +
+	((int32_t)16384)) >> 15) * (((((((var1 * ((int32_t)H6)) >> 10) * (((var1 * ((int32_t)H3)) >> 11) + ((int32_t)32768))) >> 10) + ((int32_t)2097152)) *
+	((int32_t)H2) + 8192) >> 14));
+
+	var1 = (var1 - (((((var1 >> 15) * (var1 >> 15)) >> 7) * ((int32_t)H1)) >> 4));
+	var1 = (var1 < 0 ? 0 : var1);
+	var1 = (var1 > 419430400 ? 419430400 : var1);
+
+	float output = (float)(var1>>12)/1024.0;
 	return output;
 }
 
+float readFloatPressure( void )
+{
+
+	// Returns pressure in Pa as unsigned 32 bit integer in Q24.8 format (24 integer bits and 8 fractional bits).
+	// Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa
+    uint8_t buffer[3];
+	SPI_read_register(BME280_PRESSURE_MSB_REG, &buffer[0]);
+	SPI_read_register(BME280_PRESSURE_LSB_REG, &buffer[1]);
+	SPI_read_register(BME280_PRESSURE_XLSB_REG, &buffer[2]);
+
+    int32_t adc_P = ((uint32_t)buffer[0] << 12) | ((uint32_t)buffer[1] << 4) | ((buffer[2] >> 4) & 0x0F);
+
+	int64_t var1, var2, p_acc;
+	var1 = ((int64_t)t_fine) - 128000;
+
+	uint16_t P1_MSB = 0;
+	uint16_t P1_LSB = 0;
+	uint16_t P1 = 0;
+	SPI_read_register(BME280_DIG_P1_MSB_REG, &P1_MSB);
+	SPI_read_register(BME280_DIG_P1_LSB_REG, &P1_LSB);
+	P1 = (P1_MSB << 8) | (P1_LSB);
+
+	uint16_t P2_MSB = 0;
+	uint16_t P2_LSB = 0;
+	uint16_t P2 = 0;
+	SPI_read_register(BME280_DIG_P2_MSB_REG, &P2_MSB);
+	SPI_read_register(BME280_DIG_P2_LSB_REG, &P2_LSB);
+	P2 = (P2_MSB << 8) | (P2_LSB);
+
+	uint16_t P3_MSB = 0;
+	uint16_t P3_LSB = 0;
+	uint16_t P3 = 0;
+	SPI_read_register(BME280_DIG_P3_MSB_REG, &P3_MSB);
+	SPI_read_register(BME280_DIG_P3_LSB_REG, &P3_LSB);
+	P3 = (P3_MSB << 8) | (P3_LSB);
+
+	uint16_t P4_MSB = 0;
+	uint16_t P4_LSB = 0;
+	uint16_t P4 = 0;
+	SPI_read_register(BME280_DIG_P4_MSB_REG, &P4_MSB);
+	SPI_read_register(BME280_DIG_P4_LSB_REG, &P4_LSB);
+	P4 = (P4_MSB << 8) | (P4_LSB);
+
+	uint16_t P5_MSB = 0;
+	uint16_t P5_LSB = 0;
+	uint16_t P5 = 0;
+	SPI_read_register(BME280_DIG_P5_MSB_REG, &P5_MSB);
+	SPI_read_register(BME280_DIG_P5_LSB_REG, &P5_LSB);
+	P5 = (P5_MSB << 8) | (P5_LSB);
+
+	uint16_t P6_MSB = 0;
+	uint16_t P6_LSB = 0;
+	uint16_t P6 = 0;
+	SPI_read_register(BME280_DIG_P6_MSB_REG, &P6_MSB);
+	SPI_read_register(BME280_DIG_P6_LSB_REG, &P6_LSB);
+	P6 = (P6_MSB << 8) | (P6_LSB);
+
+	uint16_t P7_MSB = 0;
+	uint16_t P7_LSB = 0;
+	uint16_t P7 = 0;
+	SPI_read_register(BME280_DIG_P7_MSB_REG, &P7_MSB);
+	SPI_read_register(BME280_DIG_P7_LSB_REG, &P7_LSB);
+	P7 = (P7_MSB << 8) | (P7_LSB);
+
+	uint16_t P8_MSB = 0;
+	uint16_t P8_LSB = 0;
+	uint16_t P8 = 0;
+	SPI_read_register(BME280_DIG_P8_MSB_REG, &P8_MSB);
+	SPI_read_register(BME280_DIG_P8_LSB_REG, &P8_LSB);
+	P8 = (P8_MSB << 8) | (P8_LSB);
+
+	uint16_t P9_MSB = 0;
+	uint16_t P9_LSB = 0;
+	uint16_t P9 = 0;
+	SPI_read_register(BME280_DIG_P9_MSB_REG, &P9_MSB);
+	SPI_read_register(BME280_DIG_P9_LSB_REG, &P9_LSB);
+	P9 = (P9_MSB << 8) | (P9_LSB);
+
+	var2 = var1 * var1 * (int64_t)P6;
+	var2 = var2 + ((var1 * (int64_t)P5)<<17);
+	var2 = var2 + (((int64_t)P4)<<35);
+	var1 = ((var1 * var1 * (int64_t)P3)>>8) + ((var1 * (int64_t)P2)<<12);
+	var1 = (((((int64_t)1)<<47)+var1))*((int64_t)P1)>>33;
+	if (var1 == 0)
+	{
+		return 0; // avoid exception caused by division by zero
+	}
+	p_acc = 1048576 - adc_P;
+	p_acc = (((p_acc<<31) - var2)*3125)/var1;
+	var1 = (((int64_t)P9) * (p_acc>>13) * (p_acc>>13)) >> 25;
+	var2 = (((int64_t)P8) * p_acc) >> 19;
+	p_acc = ((p_acc + var1 + var2) >> 8) + (((int64_t)P7)<<4);
+
+	float output = (float)p_acc / 256.0;
+	return output;
+
+}
 
 void read_sensors(sensor_val_t* sensor_val)
 {

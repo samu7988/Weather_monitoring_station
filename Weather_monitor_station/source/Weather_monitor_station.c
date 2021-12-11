@@ -104,6 +104,8 @@ int main(void) {
     	//    SPI_write_register(BME280_CONFIG_REG,0x3);
     	//	SPI_read_register(BME280_CONFIG_REG , &data);
     	float temp_val = read_temp_C();
+    	float hum_val = read_float_humidity();
+    	float pres_val = readFloatPressure();
     	printf(" %d\n\r",(int)temp_val);
     }
     return 0 ;
