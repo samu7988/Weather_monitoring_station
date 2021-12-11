@@ -62,13 +62,9 @@ int main(void) {
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
-#ifndef BOARD_INIT_DEBUG_CONSOLE_PERIPHERAL
-    /* Init FSL debug console. */
-//    BOARD_InitDebugConsole();
-#endif
+
     int status = 0;
 
-//    sysclock_init();
 	uart0_init();
 //
 	gpio_init();
@@ -97,10 +93,6 @@ int main(void) {
     volatile static int i = 0 ;
 
 	printf("%x\n",chip_id);
-//
-	    SPI_write_register(BME280_CTRL_MEAS_REG,0x3);
-		SPI_read_register(BME280_CTRL_MEAS_REG , &data);
-		printf("%x\n",data);
 
     /* Enter an infinite loop, just incrementing a counter. */
     while(1)
@@ -111,6 +103,8 @@ int main(void) {
 //			for(int j = 0; j < 7000; j++);
     	//    SPI_write_register(BME280_CONFIG_REG,0x3);
     	//	SPI_read_register(BME280_CONFIG_REG , &data);
+    	float temp_val = read_temp_C();
+    	printf(" %d\n\r",(int)temp_val);
     }
     return 0 ;
 

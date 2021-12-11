@@ -31,21 +31,21 @@ int32_t t_fine = 0;
 uint8_t bme280_init()
 {
 	uint8_t standby = 0; //0.5ms
-//	uint8_t filter = 0; //Filter off
-//	uint8_t temp_over_sample = 1;
-//	uint8_t press_over_sample = 1;
-//	uint8_t humid_over_sample = 1;
+	uint8_t filter = 0; //Filter off
+	uint8_t temp_over_sample = 1;
+	uint8_t press_over_sample = 1;
+	uint8_t humid_over_sample = 1;
 //
 //	//Most of the time the sensor will be init with default values
 //	//But in case user has old/deprecated code, use the settings.x values
 	uint8_t read_data = 0;
-//	set_standby_time(standby);
-//	set_filter(filter);
-//	set_pressure_oversample(press_over_sample); //Default of 1x oversample
-//	set_humidity_oversample(humid_over_sample); //Default of 1x oversample
-//	set_temp_oversample(temp_over_sample); //Default of 1x oversample
+	set_standby_time(standby);
+	set_filter(filter);
+	set_pressure_oversample(press_over_sample); //Default of 1x oversample
+	set_humidity_oversample(humid_over_sample); //Default of 1x oversample
+	set_temp_oversample(temp_over_sample); //Default of 1x oversample
 //
-//	set_mode(MODE_NORMAL); //Go!
+	set_mode(MODE_NORMAL); //Go!
 
 
 	SPI_read_register(BME280_CHIP_ID_REG, &read_data);
@@ -172,9 +172,6 @@ void set_mode(uint8_t mode)
 	control_data &= ~( (1<<1) | (1<<0) ); //Clear the mode[1:0] bits
 	control_data |= mode; //Set
 	SPI_write_register(BME280_CTRL_MEAS_REG, control_data);
-	SPI_read_register(BME280_CTRL_MEAS_REG,&control_data);
-	int x = 0;
-
 }
 
 //Set the pressure oversample value
@@ -218,7 +215,6 @@ void set_humidity_oversample(uint8_t over_sample_amount)
 	control_data |= over_sample_amount << 0; //Align overSampleAmount to bits 2/1/0
 	SPI_write_register(BME280_CTRL_HUMIDITY_REG, control_data);
 
-
 	set_mode(original_mode); //Return to the original user's choice
 }
 
@@ -256,7 +252,7 @@ float read_temp_C( void )
 	SPI_read_register(BME280_DIG_T3_MSB_REG, &T3_LSB);
 	T3 = (T3_MSB << 8) | (T3_LSB);
 
-	//By datasheet, calibrate
+	//By datas																																																				heet, calibrate
 	int64_t var1, var2;
 	var1 = ((((adc_T>>3) - ((int32_t)T1<<1))) * ((int32_t)T2)) >> 11;
 	var2 = (((((adc_T>>4) - ((int32_t)T1)) * ((adc_T>>4) - ((int32_t)T1))) >> 12) *
