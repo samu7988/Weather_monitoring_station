@@ -546,33 +546,33 @@ void transmit_sensors_val(sensor_val_t* sensor_val)
 
 	//Send values for temperature
 	char* temp_str[10] = {0};
-	my_itoa(sensor_val->temp_val, temp_str);
+	my_itoa(sensor_val->temp_val, (uint8_t*)temp_str);
 
 
 	strcat(buffer, "T: ");
-	strcat(buffer, temp_str);
+	strcat(buffer, (const char*)temp_str);
 	strcat(buffer, " C \n");
 
 //
 //	//Send values for pressure
 	char* press_str[10] = {0};
-	my_itoa(sensor_val->pressure_val, press_str);
+	my_itoa(sensor_val->pressure_val,(uint8_t*)press_str);
 
 	strcat(buffer, "P: ");
-	strcat(buffer, press_str);
+	strcat(buffer,(const char*)press_str);
 	strcat(buffer, " Pa \n");
 
 //
 //
 //	//Send values for humidity
 	char* hum_str[10] = {0};
-	my_itoa(sensor_val->hum_val,hum_str);
+	my_itoa(sensor_val->hum_val,(uint8_t*)hum_str);
 	strcat(buffer, "H: ");
-	strcat(buffer, hum_str);
+	strcat(buffer,(const char*)hum_str);
 	strcat(buffer, " %RH \n");
 
 	strcat(buffer, "\n***************\n");
-	uart1_puts(buffer);
+	uart1_puts((uint8_t*)buffer);
 	for(int i = 0; i < 65534 ; i++);
 
 	__enable_irq();
