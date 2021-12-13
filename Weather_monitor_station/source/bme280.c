@@ -14,11 +14,17 @@
 #include "spi.h"
 #include "bme280.h"
 #include "uart.h"
-
+#include <stdio.h>
+#include <string.h>
 //***********************************************************************************
 //                                  Macros
 //***********************************************************************************
-
+#define MIN_TEMP (-40)
+#define MAX_TEMP (50)
+#define MIN_HUM  (0)
+#define MAX_HUM  (100)
+#define MAX_PRES (0)
+#define MIN_PRES (10000)
 //***********************************************************************************
 //                              Structures
 //***********************************************************************************
@@ -28,6 +34,13 @@ int32_t t_fine = 0;
 //***********************************************************************************
 //                                  Function definition
 //***********************************************************************************
+/*---------------------------------------------------*/
+/*
+ @brief: Initialise BME280 sensor
+@param: None
+ @return:None
+ @Reference:
+-------------------------------------------------*/
 uint8_t bme280_init()
 {
 	uint8_t standby = 0; //0.5ms
@@ -52,16 +65,22 @@ uint8_t bme280_init()
 	return read_data; //Should return 0x60
 }
 
-//Set the standby bits in the config register
-//tStandby can be:
-//  0, 0.5ms
-//  1, 62.5ms
-//  2, 125ms
-//  3, 250ms
-//  4, 500ms
-//  5, 1000ms
-//  6, 10ms
-//  7, 20ms
+/*---------------------------------------------------*/
+/*
+ @brief: Set standby time in the config register
+ @param: timeSetting: Standby time
+  timeSetting can be:
+  0, 0.5ms
+  1, 62.5ms
+  2, 125ms
+  3, 250ms
+  4, 500ms
+  5, 1000ms
+  6, 10ms
+  7, 20ms
+ @return:None
+ @Reference:
+-------------------------------------------------*/
 void set_standby_time(uint8_t timeSetting)
 {
 	if(timeSetting > 0x7) timeSetting = 0; //Error check. Default to 0.5ms
@@ -72,16 +91,20 @@ void set_standby_time(uint8_t timeSetting)
 	control_data |= (timeSetting << 5); //Align with bits 7/6/5
 	SPI_write_register(BME280_CONFIG_REG, control_data);
 	SPI_read_register(BME280_CONFIG_REG,&control_data);
-	int x = 0;
 }
-
-//Set the filter bits in the config register
-//filter can be off or number of FIR coefficients to use:
-//  0, filter off
-//  1, coefficients = 2
-//  2, coefficients = 4
-//  3, coefficients = 8
-//  4, coefficients = 16
+/*---------------------------------------------------*/
+/*
+ @brief: Set filter in the config register
+ @param: filter_setting
+filter can be off or number of FIR coefficients to use:
+  0, filter off
+  1, coefficients = 2
+  2, coefficients = 4
+  3, coefficients = 8
+  4, coefficients = 16
+ @return:None
+ @Reference:
+-------------------------------------------------*/
 void set_filter(uint8_t filter_setting)
 {
 	if(filter_setting > 0x07) filter_setting = 0; //Error check. Default to filter off
@@ -93,9 +116,17 @@ void set_filter(uint8_t filter_setting)
 	SPI_write_register(BME280_CONFIG_REG, control_data);
 }
 
-//Set the temperature oversample value
-//0 turns off temp sensing
-//1 to 16 are valid over sampling values
+/*---------------------------------------------------*/
+/*
+ @brief: Set the temperature oversample value
+ @param: over_sample_amount
+ 0 turns off temp sensing
+ 1 to 16 are valid over sampling values
+ @return:None
+ @Reference:
+-------------------------------------------------*/
+//
+
 void set_temp_oversample(uint8_t over_sample_amount)
 {
 	over_sample_amount = check_sample_value(over_sample_amount); //Error check
@@ -115,10 +146,14 @@ void set_temp_oversample(uint8_t over_sample_amount)
 
 	set_mode(originalMode); //Return to the original user's choice
 }
-
-//Validates an over sample value
-//Allowed values are 0 to 16
-//These are used in the humidty, pressure, and temp oversample functions
+/*---------------------------------------------------*/
+/*
+ @brief: Validates an over sample value
+ @param: user_value: allowed values are 0 to 16.
+ 	 	 	 	 	 These are used in humidity, pressure and temp oversample function
+ @return:Returns the value to be programmed.
+ @Reference:
+-------------------------------------------------*/
 uint8_t check_sample_value(uint8_t user_value)
 {
 	switch(user_value)
@@ -147,10 +182,16 @@ uint8_t check_sample_value(uint8_t user_value)
 	}
 }
 
-//Gets the current mode bits in the ctrl_meas register
-//Mode 00 = Sleep
-// 01 and 10 = Forced
-// 11 = Normal mode
+/*---------------------------------------------------*/
+/*
+ @brief: Gets the current mode bits in the ctrl_meas register
+		 Mode 00 = Sleep
+		 01 and 10 = Forced
+		 11 = Normal mode
+ @param: None.
+ @return:Returns the value to be programmed.
+ @Reference:
+-------------------------------------------------*/
 uint8_t get_mode()
 {
 	uint8_t control_data = 0;
@@ -159,10 +200,16 @@ uint8_t get_mode()
 	return(control_data & 0x03); //Clear bits 7 through 2
 }
 
-//Set the mode bits in the ctrl_meas register
-// Mode 00 = Sleep
-// 01 and 10 = Forced
-// 11 = Normal mode
+/*---------------------------------------------------*/
+/*
+ @brief: Set the mode bits in the ctrl_meas register
+		 Mode 00 = Sleep
+		 01 and 10 = Forced
+		 11 = Normal mode
+ @param: None.
+ @return:Returns the value to be programmed.
+ @Reference:
+-------------------------------------------------*/
 void set_mode(uint8_t mode)
 {
 	if(mode > 0x3) mode = 0; //Error check. Default to sleep mode
@@ -173,10 +220,15 @@ void set_mode(uint8_t mode)
 	control_data |= mode; //Set
 	SPI_write_register(BME280_CTRL_MEAS_REG, control_data);
 }
-
-//Set the pressure oversample value
-//0 turns off pressure sensing
-//1 to 16 are valid over sampling values
+/*---------------------------------------------------*/
+/*
+ @brief: Set the pressure oversample value
+		0 turns off pressure sensing
+		1 to 16 are valid over sampling values
+ @param: over_sample_amount: Over sample amount to be set.
+ @return:None.
+ @Reference:
+-------------------------------------------------*/
 void set_pressure_oversample(uint8_t over_sample_amount)
 {
 	over_sample_amount = check_sample_value(over_sample_amount); //Error check
@@ -196,9 +248,15 @@ void set_pressure_oversample(uint8_t over_sample_amount)
 	set_mode(original_mode); //Return to the original user's choice
 }
 
-//Set the humidity oversample value
-//0 turns off humidity sensing
-//1 to 16 are valid over sampling values
+/*---------------------------------------------------*/
+/*
+ @brief: Set the humidity oversample value
+		0 turns off humidity sensing
+		1 to 16 are valid over sampling values
+ @param: over_sample_amount: Over sample amount to be set.
+ @return:None.
+ @Reference:
+-------------------------------------------------*/
 void set_humidity_oversample(uint8_t over_sample_amount)
 {
 	over_sample_amount = check_sample_value(over_sample_amount); //Error check
@@ -218,6 +276,13 @@ void set_humidity_oversample(uint8_t over_sample_amount)
 	set_mode(original_mode); //Return to the original user's choice
 }
 
+/*---------------------------------------------------*/
+/*
+ @brief: Read temperature values in celsius
+ @param: None.
+ @return:None.
+ @Reference:
+-------------------------------------------------*/
 float read_temp_C( void )
 {
 	// Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23 DegC.
@@ -267,6 +332,13 @@ float read_temp_C( void )
 	return output;
 }
 
+/*---------------------------------------------------*/
+/*
+ @brief: Read humidity in float
+ @param: None.
+ @return: humidity value in %RH
+ @Reference:
+-------------------------------------------------*/
 float read_float_humidity( void )
 {
 
@@ -326,6 +398,13 @@ float read_float_humidity( void )
 	return output;
 }
 
+/*---------------------------------------------------*/
+/*
+ @brief: Read Pressure value in float
+ @param: None.
+ @return: Pressure value in Pa
+ @Reference:
+-------------------------------------------------*/
 float readFloatPressure( void )
 {
 
@@ -424,21 +503,49 @@ float readFloatPressure( void )
 
 }
 
+/*---------------------------------------------------*/
+/*
+ @brief: Read the value of temperature, humidity and pressure
+ @param: sensor_val: Pointer to structure that holds temp, humidity and pressure
+ @return: Pressure value in Pa
+ @Reference:
+-------------------------------------------------*/
 void read_sensors(sensor_val_t* sensor_val)
 {
 	sensor_val->temp_val = (uint8_t)read_temp_C();
-	sensor_val->hum_val = (uint8_t)readFloatPressure();;
+	if(sensor_val->temp_val < MIN_TEMP && sensor_val->temp_val > MAX_TEMP)
+	{
+		printf("Temperature value outside the valid range\n\r");
+	}
+
+	sensor_val->hum_val = (uint8_t)readFloatPressure();
+	if(sensor_val->hum_val < MIN_HUM && sensor_val->hum_val > MAX_HUM)
+	{
+		printf("Humidity values outside the valid range\n\r");
+	}
+
 	sensor_val->pressure_val = (uint8_t)read_float_humidity();
+	if(sensor_val->pressure_val < MIN_PRES && sensor_val->pressure_val > MAX_PRES)
+	{
+		printf("Pressure value outside the valid range\n\r");
+	}
 }
 
+/*---------------------------------------------------*/
+/*
+ @brief: Transmit values of sensor via UART1
+ @param: sensor_val: Pointer to structure that holds temp, humidity and pressure
+ @return: None.
+ @Reference:
+-------------------------------------------------*/
 void transmit_sensors_val(sensor_val_t* sensor_val)
 {
 	__disable_irq();
 
-	uint8_t buffer[200];
+	char buffer[200];
 
 	//Send values for temperature
-	uint8_t* temp_str[10] = {0};
+	char* temp_str[10] = {0};
 	my_itoa(sensor_val->temp_val, temp_str);
 
 
@@ -448,7 +555,7 @@ void transmit_sensors_val(sensor_val_t* sensor_val)
 
 //
 //	//Send values for pressure
-	uint8_t* press_str[10] = {0};
+	char* press_str[10] = {0};
 	my_itoa(sensor_val->pressure_val, press_str);
 
 	strcat(buffer, "P: ");
@@ -458,7 +565,7 @@ void transmit_sensors_val(sensor_val_t* sensor_val)
 //
 //
 //	//Send values for humidity
-	uint8_t* hum_str[10] = {0};
+	char* hum_str[10] = {0};
 	my_itoa(sensor_val->hum_val,hum_str);
 	strcat(buffer, "H: ");
 	strcat(buffer, hum_str);

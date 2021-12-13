@@ -43,7 +43,6 @@
 #include "bme280.h"
 #include "spi.h"
 #include "uart.h"
-#include "sysclock.h"
 #include "cbfifo.h"
 #include "systick.h"
 #include "statemachine.h"
@@ -51,9 +50,13 @@
 #define ENABLE_LOGGING (1)
 
 
+/*---------------------------------------------------------------------*/
 /*
- * @brief   Application entry point.
+ @brief: Main function that is responsible to initialise peripherals and call the state machine
+ @param: None
+ @return: None
  */
+/*---------------------------------------------------------------------------*/
 int main(void) {
 
   	/* Init board hardware. */
@@ -90,19 +93,16 @@ int main(void) {
     	printf("BME280 sensor initialization is successfull\n\r");
     }
 
-
-    /* Enter an infinite loop, just incrementing a counter. */
     while(1)
     {
-    	/**********************************
-    	 * Run weather monitor state machine
-    	 * 1) Wait for timer event to fire
-    	 * 2) When timer event occurs, read sensor data(temp, humidity and pressure)
-    	 * 3) Send the values of sensor to bluetooth using UART1
-    	 ***********************************/
+	/**********************************
+	 * Run weather monitor state machine
+	 * 1) Wait for timer event to fire
+	 * 2) When timer event occurs, read sensor data(temp, humidity and pressure)
+	 * 3) Send the values of sensor to bluetooth using UART1
+	 ***********************************/
 
     	weather_monitor_statemachine();
-//    	uart1_puts("Vikrant\n");
 
     }
     return 0 ;

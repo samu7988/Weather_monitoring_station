@@ -11,7 +11,6 @@
 //                              Include files
 //***********************************************************************************
 #include "MKL25Z4.h"
-#include "sysclock.h"
 #include "uart.h"
 #include "cbfifo.h"
 #include <string.h>
@@ -20,10 +19,16 @@
 //***********************************************************************************
 #define UART_OVERSAMPLE_RATE (16)
 
+//UART0 configuration
 #define BAUD_RATE (38400)
 #define STOP_BITS	(1) //0->1 stop bit, 1->2 stop bits
 #define PARITY		(0) //0->No parity
 #define DATA_BITS   (0) //0->8 bits, 1->9bits
+#define CORE_FREQ   (48000000)
+
+//UART1 configuration
+#define UART1_BAUD_RATE (9600)
+#define SYSCLOCK_FREQUENCY (24000000U)
 
 //***********************************************************************************
 //                                  Function definition
@@ -41,26 +46,6 @@ void UART0_IRQHandler(void)
 		rcvd_val = UART0->D;
 		cb_status = cbfifo_enqueue(RX_BUFFER,&rcvd_val); //Enqueue the received data into Rx buffer(accessed via handler)
 	}
-//	else if((UART0->S1 & UART0_S1_TDRE_MASK)) //when data register is empty
-//	{
-//		uint8_t tx_val = 0;
-//		//if previous trasnmission is complete, then dequeue a character from Tx buffer and start with another transmission
-//		if(UART0->S1 & UART0_S1_TC_MASK){
-//			cb_status = cbfifo_dequeue(TX_BUFFER, &tx_val);
-//
-//			//Only proceed with transmission if circular buffer is not empty
-//			if(cb_status != CB_EMPTY && cb_status != CB_INSTANCE_ERROR)
-//			{
-//				UART0->D = tx_val;
-//				UART0->C2 &= ~UART0_C2_TIE(1); ///Disable transmit interrupt
-//			}
-//			else if(cb_status == CB_INSTANCE_ERROR){
-//				//Handle errors
-//			}
-//		}
-//
-//
-//	}
 
 	 if((UART0->C2 & UART0_C2_TIE_MASK) &&
 	    (UART0->S1 & UART0_S1_TDRE_MASK)){
@@ -168,7 +153,6 @@ void uart0_init()
 
 	//set UART clock to  24 MHz clock
 	SIM->SOPT2 |= SIM_SOPT2_UART0SRC(1); //select clock source as PLL/2 or FLL
-//	SIM->SOPT2 &= ~SIM_SOPT2_PLLFLLSEL_MASK; //set FLL as clock source
 	SIM->SOPT2 |= SIM_SOPT2_PLLFLLSEL_MASK; //set FLL as clock source
 
 
@@ -177,7 +161,7 @@ void uart0_init()
 	PORTA->PCR[2] = PORT_PCR_ISF_MASK | PORT_PCR_MUX(2); //Tx
 
 	//Set baud rate and oversampling ratio
-	sbr = (uint16_t)((48000000)/(38400 * UART_OVERSAMPLE_RATE));
+	sbr = (uint16_t)((CORE_FREQ)/(38400 * UART_OVERSAMPLE_RATE));
 	UART0->BDH &= ~UART0_BDH_SBR_MASK;
 	UART0->BDH |= UART0_BDH_SBR(sbr>>8);
 	UART0->BDL = UART0_BDL_SBR(sbr);
@@ -203,6 +187,13 @@ void uart0_init()
 	UART0->C2 |=  UART0_C2_RIE(1);
 
 }
+/*-------------------------------------------------------------------------*/
+/*
+ @brief: Initialise UART1 peripheral
+ @param: None
+ @return: None
+ */
+/*-------------------------------------------------------------------------*/
 
 void uart1_init()
 {
@@ -216,7 +207,7 @@ void uart1_init()
 	PORTE->PCR[0] = PORT_PCR_MUX(3); /* PTE0 for UART2 transmit */
 	UART1->C2 = 0;
 
-	sbr = (uint16_t)((SYSCLOCK_FREQUENCY)/(9600 * UART_OVERSAMPLE_RATE)); //313 or 0x139
+	sbr = (uint16_t)((SYSCLOCK_FREQUENCY)/(UART1_BAUD_RATE * UART_OVERSAMPLE_RATE)); //313 or 0x139
 	UART1->BDH &= ~UART_BDH_SBR_MASK;
 	UART1->BDH |= UART_BDH_SBR(sbr>>8);
 	UART1->BDL = UART_BDL_SBR(sbr);
@@ -225,16 +216,15 @@ void uart1_init()
 	UART1->C3 = 0x00; /* no fault interrupt */
 	UART1->C2 |= UART_C2_TE(1) ;
 }
-/*-----------------------------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 /*
  @brief: Send message through UART1
- @param: None
+ @param: msg: Message to be sent to bluetooth
  @return: None
  */
 /*-------------------------------------------------------------------------*/
 void uart1_puts(uint8_t* msg)
 {
-	//__disable_irq();
 	uint8_t i = 0;
 	while(msg[i] != '\0')
 	{
@@ -242,9 +232,16 @@ void uart1_puts(uint8_t* msg)
 		UART1->D = msg[i];
 		i++;
 	}
-	//__enable_irq();
 }
 
+/*-------------------------------------------------------------------------*/
+/*
+ @brief: Reverse the string
+ @param: input: Input string to be reversed
+ 	 	 count: Length of string
+ @return: None
+ */
+/*-------------------------------------------------------------------------*/
 static void reverse_str(uint8_t* input, uint8_t count)
 {
 	int start = 0;
@@ -261,6 +258,14 @@ static void reverse_str(uint8_t* input, uint8_t count)
 	}
 }
 
+/*-------------------------------------------------------------------------*/
+/*
+ @brief: Converts integer value to ASCII
+ @param: num: Integer value that is to be converted into ASCII string
+         result: Pointer to character string in which ASCII string is stored
+ @return: None
+ */
+/*-------------------------------------------------------------------------*/
 void my_itoa(size_t num,uint8_t* result)
 {
 	size_t remainder = 0;
