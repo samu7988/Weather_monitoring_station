@@ -55,7 +55,7 @@ void systick_init()
 {
 
 
-	SysTick->LOAD = (48000000L)/4;
+	SysTick->LOAD = (48000000L)/1;
 	NVIC_SetPriority(SysTick_IRQn, 3);
 	SysTick->VAL = 0;
 	SysTick->CTRL = SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk;

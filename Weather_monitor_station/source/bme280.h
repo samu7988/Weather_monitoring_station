@@ -74,7 +74,7 @@ typedef struct
 #define BME280_HUMIDITY_MSB_REG			0xFD //Humidity MSB
 #define BME280_HUMIDITY_LSB_REG			0xFE //Humidity LSB
 
-
+#define CHIP_REV 						0x60
 //***********************************************************************************
 //                                  Function Prototype
 //***********************************************************************************

@@ -24,6 +24,6 @@
 void uart0_init();
 void uart1_init();
 void uart1_puts(uint8_t* msg);
-
+void my_itoa(size_t num, uint8_t* input);
 
 #endif /* UART_H_ */

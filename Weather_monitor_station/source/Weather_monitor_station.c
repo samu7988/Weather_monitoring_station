@@ -49,9 +49,7 @@
 #include "statemachine.h"
 
 #define ENABLE_LOGGING (1)
-/* TODO: insert other include files here. */
 
-/* TODO: insert other definitions and declarations here. */
 
 /*
  * @brief   Application entry point.
@@ -63,50 +61,49 @@ int main(void) {
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
 
+    /***************************************************
+     * 	       PERIPHERAL INITIALISATION
+     **************************************************/
     int status = 0;
+	uart0_init(); //Initialise UART0(Needed for enable console logging
+	gpio_init();  // PD0 acts as SPI chip select(initialise PD0)
+    spi_init();   //Initialise SPI with CPHA=CPOL=0
 
-	uart0_init();
-//
-	gpio_init();
-    spi_init();
-
-    uart1_init();
-    systick_init();
+    uart1_init(); //Bluetooth module uses UART1 for sending data
+    systick_init(); //Timer initialisation that fires every 3 seconds
 
     //Create the Tx handle that points to tx buffer(statically allocated)
     status |= create_tx_cb_handle();
 
-    /*
-     * SPI coding
-     */
+
+    /***********************************************************************
+     * 	 Test whether Environmental sensor is connected by reading chip ID
+     ***********************************************************************/
     uint8_t chip_id = bme280_init();
-    if(chip_id != 0x60)
+
+    if(chip_id != CHIP_REV)
     {
-    	printf("The sensor did not respond with correct chip id val,Please check\n\r");
+    	printf("The sensor did not respond with correct chip id val,Please check the connection\n\r");
     }
     else
     {
-    	printf("BME280 sensor initialisation is successfull\n\r");
+    	printf("BME280 sensor initialization is successfull\n\r");
     }
-    uint8_t data = 0;
-    /* Force the counter to be placed into memory. */
-    volatile static int i = 0 ;
 
-	printf("%x\n",chip_id);
 
     /* Enter an infinite loop, just incrementing a counter. */
     while(1)
     {
-//    	uart1_puts("Vikrant\n\r");
-//    	weather_monitor_statemachine();
-//		for(int k = 0; k < 10; k++)
-//			for(int j = 0; j < 7000; j++);
-    	//    SPI_write_register(BME280_CONFIG_REG,0x3);
-    	//	SPI_read_register(BME280_CONFIG_REG , &data);
-    	float temp_val = read_temp_C();
-    	float hum_val = read_float_humidity();
-    	float pres_val = readFloatPressure();
-    	printf(" %d\n\r",(int)temp_val);
+    	/**********************************
+    	 * Run weather monitor state machine
+    	 * 1) Wait for timer event to fire
+    	 * 2) When timer event occurs, read sensor data(temp, humidity and pressure)
+    	 * 3) Send the values of sensor to bluetooth using UART1
+    	 ***********************************/
+
+    	weather_monitor_statemachine();
+//    	uart1_puts("Vikrant\n");
+
     }
     return 0 ;
 

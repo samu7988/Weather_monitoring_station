@@ -426,16 +426,48 @@ float readFloatPressure( void )
 
 void read_sensors(sensor_val_t* sensor_val)
 {
- //TODO: read the values of temperature, humidity and pressure
-	sensor_val->temp_val = 25;
-	sensor_val->pressure_val = 5;
-	sensor_val->hum_val = 7;
+	sensor_val->temp_val = (uint8_t)read_temp_C();
+	sensor_val->hum_val = (uint8_t)readFloatPressure();;
+	sensor_val->pressure_val = (uint8_t)read_float_humidity();
 }
 
 void transmit_sensors_val(sensor_val_t* sensor_val)
 {
-	//TODO: Send value of sensors via Bluetooth to mobile application
-	uart1_puts((uint8_t*)"T:\n");
-	uart1_puts((uint8_t*)"P:\n");
-	uart1_puts((uint8_t*)"H:\n");
+	__disable_irq();
+
+	uint8_t buffer[200];
+
+	//Send values for temperature
+	uint8_t* temp_str[10] = {0};
+	my_itoa(sensor_val->temp_val, temp_str);
+
+
+	strcat(buffer, "T: ");
+	strcat(buffer, temp_str);
+	strcat(buffer, " C \n");
+
+//
+//	//Send values for pressure
+	uint8_t* press_str[10] = {0};
+	my_itoa(sensor_val->pressure_val, press_str);
+
+	strcat(buffer, "P: ");
+	strcat(buffer, press_str);
+	strcat(buffer, " Pa \n");
+
+//
+//
+//	//Send values for humidity
+	uint8_t* hum_str[10] = {0};
+	my_itoa(sensor_val->hum_val,hum_str);
+	strcat(buffer, "H: ");
+	strcat(buffer, hum_str);
+	strcat(buffer, " %RH \n");
+
+	strcat(buffer, "\n***************\n");
+	uart1_puts(buffer);
+	for(int i = 0; i < 65534 ; i++);
+
+	__enable_irq();
+
 }

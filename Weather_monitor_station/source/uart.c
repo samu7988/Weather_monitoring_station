@@ -245,3 +245,39 @@ void uart1_puts(uint8_t* msg)
 	//__enable_irq();
 }
 
+static void reverse_str(uint8_t* input, uint8_t count)
+{
+	int start = 0;
+	int end = count - 1;
+
+	char temp = 0;
+	while(start < end)
+	{
+		temp = input[start];
+		input[start] = input[end];
+		input[end] = temp;
+		start++;
+		end--;
+	}
+}
+
+void my_itoa(size_t num,uint8_t* result)
+{
+	size_t remainder = 0;
+	size_t count = 0;
+	if(result == NULL)
+	{
+		return ;
+	}
+
+	while(num)
+	{
+		remainder = num % 10;
+		num = num / 10;
+		result[count++] = '0' + remainder;
+	}
+
+	result[count] = '\0';
+	reverse_str(result, count);
+
+}
