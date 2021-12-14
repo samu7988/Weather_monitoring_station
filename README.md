@@ -11,3 +11,7 @@ The FRDM board is connected to Bluetooth sensor using UART protocol.</br>
 
 ### Sensor values sent to bluetooth application on mobile</br>
 ![Sensor_values_on_application](https://github.com/samu7988/PES_Project_weather_monitoring_station/blob/main/Bluetooth_values.jpeg)
+
+
+### Video link for project </br>
+![Project demo] (https://studio.youtube.com/video/yTPj0NAjv9U/edit)
