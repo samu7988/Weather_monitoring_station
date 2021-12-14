@@ -7,7 +7,7 @@ Once the values are read by FRDM board, the values will be sent periodically to 
 The FRDM board is connected to Bluetooth sensor using UART protocol.</br>
 
 ### Hardware</br>
-![Hardware](https://github.com/CU-ECEN-5823/ecen5823-assignment3-samu7988/blob/master/images/3.PNG)
+![Hardware](https://github.com/samu7988/PES_Project_weather_monitoring_station/blob/main/Hardware.jpeg)
 
 ### Sensor values sent to bluetooth application on mobile</br>
-![Sensor_values_on_application](https://github.com/CU-ECEN-5823/ecen5823-assignment3-samu7988/blob/master/images/3.PNG)
+![Sensor_values_on_application](https://github.com/samu7988/PES_Project_weather_monitoring_station/blob/main/Bluetooth_values.jpeg)
