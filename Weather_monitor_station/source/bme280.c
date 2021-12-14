@@ -300,22 +300,22 @@ float read_temp_C( void )
 	uint16_t T1_MSB = 0;
 	uint16_t T1_LSB = 0;
 	uint16_t T1 = 0;
-	SPI_read_register(BME280_DIG_T1_MSB_REG, &T1_MSB);
-	SPI_read_register(BME280_DIG_T1_LSB_REG, &T1_LSB);
+	SPI_read_register(BME280_DIG_T1_MSB_REG, (uint8_t*)&T1_MSB);
+	SPI_read_register(BME280_DIG_T1_LSB_REG, (uint8_t*)&T1_LSB);
 	T1 = (T1_MSB << 8) | (T1_LSB);
 
 	uint16_t T2_MSB = 0;
 	uint16_t T2_LSB = 0;
 	uint16_t T2 = 0;
-	SPI_read_register(BME280_DIG_T2_MSB_REG, &T2_MSB);
-	SPI_read_register(BME280_DIG_T2_LSB_REG, &T2_LSB);
+	SPI_read_register(BME280_DIG_T2_MSB_REG, (uint8_t*)&T2_MSB);
+	SPI_read_register(BME280_DIG_T2_LSB_REG, (uint8_t*)&T2_LSB);
 	T2 = (T2_MSB << 8) | (T2_LSB);
 
 	uint16_t T3_MSB = 0;
 	uint16_t T3_LSB = 0;
 	uint16_t T3 = 0;
-	SPI_read_register(BME280_DIG_T3_MSB_REG, &T3_MSB);
-	SPI_read_register(BME280_DIG_T3_LSB_REG, &T3_LSB);
+	SPI_read_register(BME280_DIG_T3_MSB_REG, (uint8_t*)&T3_MSB);
+	SPI_read_register(BME280_DIG_T3_LSB_REG, (uint8_t*)&T3_LSB);
 	T3 = (T3_MSB << 8) | (T3_LSB);
 
 	//By datas																																																				heet, calibrate
@@ -360,8 +360,8 @@ float read_float_humidity( void )
 	uint16_t H2_MSB = 0;
 	uint16_t H2_LSB = 0;
 	uint16_t H2 = 0;
-	SPI_read_register(BME280_DIG_H2_MSB_REG, &H2_MSB);
-	SPI_read_register(BME280_DIG_H2_LSB_REG, &H2_LSB);
+	SPI_read_register(BME280_DIG_H2_MSB_REG, (uint8_t*)&H2_MSB);
+	SPI_read_register(BME280_DIG_H2_LSB_REG, (uint8_t*)&H2_LSB);
 	H2 = (H2_MSB << 8) | (H2_LSB);
 
 	uint8_t H3 = 0;
@@ -370,15 +370,15 @@ float read_float_humidity( void )
 	uint16_t H4_MSB = 0;
 	uint16_t H4_LSB = 0;
 	uint16_t H4 = 0;
-	SPI_read_register(BME280_DIG_H4_MSB_REG, &H4_MSB);
-	SPI_read_register(BME280_DIG_H4_LSB_REG, &H4_LSB);
+	SPI_read_register(BME280_DIG_H4_MSB_REG, (uint8_t*)&H4_MSB);
+	SPI_read_register(BME280_DIG_H4_LSB_REG, (uint8_t*)&H4_LSB);
 	H4 = (H4_MSB << 4) | (H4_LSB & 0x0F);
 
 	uint16_t H5_MSB = 0;
 	uint16_t H5_LSB = 0;
 	uint16_t H5 = 0;
-	SPI_read_register(BME280_DIG_H5_MSB_REG, &H5_MSB);
-	SPI_read_register(BME280_DIG_H4_LSB_REG, &H5_LSB);
+	SPI_read_register(BME280_DIG_H5_MSB_REG, (uint8_t*)&H5_MSB);
+	SPI_read_register(BME280_DIG_H4_LSB_REG, (uint8_t*)&H5_LSB);
 	H5 = (H5_MSB << 4) | ((H5_LSB >> 4) & 0x0F);
 
 	uint8_t H6 = 0;
@@ -423,64 +423,64 @@ float readFloatPressure( void )
 	uint16_t P1_MSB = 0;
 	uint16_t P1_LSB = 0;
 	uint16_t P1 = 0;
-	SPI_read_register(BME280_DIG_P1_MSB_REG, &P1_MSB);
-	SPI_read_register(BME280_DIG_P1_LSB_REG, &P1_LSB);
+	SPI_read_register(BME280_DIG_P1_MSB_REG, (uint8_t*)&P1_MSB);
+	SPI_read_register(BME280_DIG_P1_LSB_REG, (uint8_t*)&P1_LSB);
 	P1 = (P1_MSB << 8) | (P1_LSB);
 
 	uint16_t P2_MSB = 0;
 	uint16_t P2_LSB = 0;
 	uint16_t P2 = 0;
-	SPI_read_register(BME280_DIG_P2_MSB_REG, &P2_MSB);
-	SPI_read_register(BME280_DIG_P2_LSB_REG, &P2_LSB);
+	SPI_read_register(BME280_DIG_P2_MSB_REG, (uint8_t*)&P2_MSB);
+	SPI_read_register(BME280_DIG_P2_LSB_REG, (uint8_t*)&P2_LSB);
 	P2 = (P2_MSB << 8) | (P2_LSB);
 
 	uint16_t P3_MSB = 0;
 	uint16_t P3_LSB = 0;
 	uint16_t P3 = 0;
-	SPI_read_register(BME280_DIG_P3_MSB_REG, &P3_MSB);
-	SPI_read_register(BME280_DIG_P3_LSB_REG, &P3_LSB);
+	SPI_read_register(BME280_DIG_P3_MSB_REG,(uint8_t*)&P3_MSB);
+	SPI_read_register(BME280_DIG_P3_LSB_REG,(uint8_t*)&P3_LSB);
 	P3 = (P3_MSB << 8) | (P3_LSB);
 
 	uint16_t P4_MSB = 0;
 	uint16_t P4_LSB = 0;
 	uint16_t P4 = 0;
-	SPI_read_register(BME280_DIG_P4_MSB_REG, &P4_MSB);
-	SPI_read_register(BME280_DIG_P4_LSB_REG, &P4_LSB);
+	SPI_read_register(BME280_DIG_P4_MSB_REG,(uint8_t*)&P4_MSB);
+	SPI_read_register(BME280_DIG_P4_LSB_REG,(uint8_t*)&P4_LSB);
 	P4 = (P4_MSB << 8) | (P4_LSB);
 
 	uint16_t P5_MSB = 0;
 	uint16_t P5_LSB = 0;
 	uint16_t P5 = 0;
-	SPI_read_register(BME280_DIG_P5_MSB_REG, &P5_MSB);
-	SPI_read_register(BME280_DIG_P5_LSB_REG, &P5_LSB);
+	SPI_read_register(BME280_DIG_P5_MSB_REG,(uint8_t*)&P5_MSB);
+	SPI_read_register(BME280_DIG_P5_LSB_REG,(uint8_t*)&P5_LSB);
 	P5 = (P5_MSB << 8) | (P5_LSB);
 
 	uint16_t P6_MSB = 0;
 	uint16_t P6_LSB = 0;
 	uint16_t P6 = 0;
-	SPI_read_register(BME280_DIG_P6_MSB_REG, &P6_MSB);
-	SPI_read_register(BME280_DIG_P6_LSB_REG, &P6_LSB);
+	SPI_read_register(BME280_DIG_P6_MSB_REG,(uint8_t*)&P6_MSB);
+	SPI_read_register(BME280_DIG_P6_LSB_REG,(uint8_t*)&P6_LSB);
 	P6 = (P6_MSB << 8) | (P6_LSB);
 
 	uint16_t P7_MSB = 0;
 	uint16_t P7_LSB = 0;
 	uint16_t P7 = 0;
-	SPI_read_register(BME280_DIG_P7_MSB_REG, &P7_MSB);
-	SPI_read_register(BME280_DIG_P7_LSB_REG, &P7_LSB);
+	SPI_read_register(BME280_DIG_P7_MSB_REG,(uint8_t*)&P7_MSB);
+	SPI_read_register(BME280_DIG_P7_LSB_REG,(uint8_t*)&P7_LSB);
 	P7 = (P7_MSB << 8) | (P7_LSB);
 
 	uint16_t P8_MSB = 0;
 	uint16_t P8_LSB = 0;
 	uint16_t P8 = 0;
-	SPI_read_register(BME280_DIG_P8_MSB_REG, &P8_MSB);
-	SPI_read_register(BME280_DIG_P8_LSB_REG, &P8_LSB);
+	SPI_read_register(BME280_DIG_P8_MSB_REG,(uint8_t*)&P8_MSB);
+	SPI_read_register(BME280_DIG_P8_LSB_REG,(uint8_t*)&P8_LSB);
 	P8 = (P8_MSB << 8) | (P8_LSB);
 
 	uint16_t P9_MSB = 0;
 	uint16_t P9_LSB = 0;
 	uint16_t P9 = 0;
-	SPI_read_register(BME280_DIG_P9_MSB_REG, &P9_MSB);
-	SPI_read_register(BME280_DIG_P9_LSB_REG, &P9_LSB);
+	SPI_read_register(BME280_DIG_P9_MSB_REG,(uint8_t*)&P9_MSB);
+	SPI_read_register(BME280_DIG_P9_LSB_REG,(uint8_t*)&P9_LSB);
 	P9 = (P9_MSB << 8) | (P9_LSB);
 
 	var2 = var1 * var1 * (int64_t)P6;
@@ -515,19 +515,19 @@ void read_sensors(sensor_val_t* sensor_val)
 	sensor_val->temp_val = (uint8_t)read_temp_C();
 	if(sensor_val->temp_val < MIN_TEMP && sensor_val->temp_val > MAX_TEMP)
 	{
-		printf("Temperature value outside the valid range\n\r");
+//		printf("Temperature value outside the valid range\n\r");
 	}
 
 	sensor_val->hum_val = (uint8_t)readFloatPressure();
 	if(sensor_val->hum_val < MIN_HUM && sensor_val->hum_val > MAX_HUM)
 	{
-		printf("Humidity values outside the valid range\n\r");
+//		printf("Humidity values outside the valid range\n\r");
 	}
 
 	sensor_val->pressure_val = (uint8_t)read_float_humidity();
 	if(sensor_val->pressure_val < MIN_PRES && sensor_val->pressure_val > MAX_PRES)
 	{
-		printf("Pressure value outside the valid range\n\r");
+//		printf("Pressure value outside the valid range\n\r");
 	}
 }
 
