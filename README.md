@@ -14,4 +14,4 @@ The FRDM board is connected to Bluetooth sensor using UART protocol.</br>
 
 
 ### Video link for project </br>
-![Project demo](https://studio.youtube.com/video/yTPj0NAjv9U/edit)
+![Project demo](https://www.youtube.com/watch?v=yTPj0NAjv9U)
